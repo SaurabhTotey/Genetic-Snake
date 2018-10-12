@@ -1,7 +1,7 @@
 import math
 import random
 
-class SnakeBlock():
+class SnakeBlock:
 
     def __init__(self, x, y):
         self.x = x
@@ -15,7 +15,7 @@ class SnakeBlock():
 
 
 
-class SnakeGame():
+class SnakeGame:
 
     def __init__(self):
         self.width = 20

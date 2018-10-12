@@ -1,5 +1,6 @@
 import sklearn
 import SnakeGame
+import SnakeGui
 
 if __name__ == '__main__':
-    pass
+    SnakeGui.SnakeWindow(SnakeGame.SnakeGame())
