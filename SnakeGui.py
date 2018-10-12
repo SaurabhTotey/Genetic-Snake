@@ -11,9 +11,21 @@ class SnakeWindow(tkinter.Frame):
         self.master.resizable(0, 0)
         self.master.title("Snake!")
         self.canvas = tkinter.Canvas(self)
-        self.master.after(17, lambda: self.draw(game, self.master))
+        self.canvas.pack(fill=tkinter.BOTH, expand=1)
+        self.master.after(17, lambda: self.draw(game, self.master, 1))
         self.master.mainloop()
 
-    def draw(self, game, root):
-        self.canvas.create_text(0, 0, text="HELLO WORLD")
-        root.after(17, lambda: self.draw(game, root))
+    def draw(self, game, root, counter):
+        if counter % 15 == 0:
+            if not game.step():
+                return
+        self.canvas.delete("all")
+        self.drawBlock(game.appleX, game.appleY, "#f00", "#fff")
+        for block in game.snake:
+            self.drawBlock(block.x, block.y, "#000", "#fff")
+        root.after(17, lambda: self.draw(game, root, counter + 1))
+
+    def drawBlock(self, row, col, fill, stroke):
+        x = row * self.cellSize
+        y = col * self.cellSize
+        self.canvas.create_rectangle(x, y, x + self.cellSize, y + self.cellSize, outline=stroke, fill=fill)

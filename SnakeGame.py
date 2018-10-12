@@ -13,6 +13,9 @@ class SnakeBlock:
         self.y += yChange
         self.isInitialized = True
 
+    def __repr__(self):
+        return "SnakeBlock(" + str(self.x) + ", " + str(self.y) + ", " + "isInitialized = " + str(self.isInitialized) + ")"
+
 
 
 class SnakeGame:
@@ -20,11 +23,10 @@ class SnakeGame:
     def __init__(self):
         self.width = 20
         self.height = 35
-        self.snakeX = self.width / 2
-        self.snakeY = self.height / 2
-        self.snake = [SnakeBlock(self.width / 2, math.floor(self.height / 2)), SnakeBlock(self.width / 2, math.floor(self.height / 2))]
-        self.snake[0].isInitialized = True
-        self.snakeDirection = [0, 1]
+        snakeX = math.floor(self.width / 2)
+        snakeY = math.floor(self.height / 2)
+        self.snake = [SnakeBlock(snakeX, snakeY), SnakeBlock(snakeX, snakeY)]
+        self.snakeDirection = [0, -1]
         self.queueDirection = None
         self.score = 0
         self.generateApple()
@@ -44,7 +46,8 @@ class SnakeGame:
         oldX = self.snake[0].x
         oldY = self.snake[0].y
         self.snake[0].move(self.snakeDirection[0], self.snakeDirection[1])
-        for part in self.snake:
+        for i in range(1, len(self.snake)):
+            part = self.snake[i]
             if not part.isInitialized:
                 part.isInitialized = True
                 break
@@ -54,12 +57,12 @@ class SnakeGame:
             oldX = newOldX
             oldY = newOldY
         for part in self.snake:
-            if part.isInitialized and any(piece != part and piece.isInitialized and piece.x == part.x and piece.y == part.y for piece in self.snake):
+            if part.isInitialized and any((piece != part and piece.isInitialized and piece.x == part.x and piece.y == part.y) for piece in self.snake):
                 return False
             if part.x < 0 or part.x >= self.width or part.y < 0 or part.y >= self.height:
                 return False
             if part.x == self.appleX and part.y == self.appleY:
                 self.snake.append(SnakeBlock(self.snake[-1].x, self.snake[-1].y))
                 self.generateApple()
-        self.score += len(part for part in self.snake if part.isInitialized)
+        self.score += len([part for part in self.snake if part.isInitialized])
         return True
