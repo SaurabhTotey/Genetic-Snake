@@ -22,7 +22,8 @@ class SnakeGame():
         self.height = 35
         self.snakeX = self.width / 2
         self.snakeY = self.height / 2
-        self.snake = [SnakeBlock(self.width / 2, math.floor(self.height / 2)), SnakeBlock(self.width / 2, math.floor(self.height / 2) - 1)]
+        self.snake = [SnakeBlock(self.width / 2, math.floor(self.height / 2)), SnakeBlock(self.width / 2, math.floor(self.height / 2))]
+        self.snake[0].isInitialized = True
         self.snakeDirection = [0, 1]
         self.queueDirection = None
         self.score = 0
@@ -44,18 +45,21 @@ class SnakeGame():
         oldY = self.snake[0].y
         self.snake[0].move(self.snakeDirection[0], self.snakeDirection[1])
         for part in self.snake:
+            if not part.isInitialized:
+                part.isInitialized = True
+                break
             newOldX = part.x
             newOldY = part.y
             part.move(oldX - newOldX, oldY - newOldY)
             oldX = newOldX
             oldY = newOldY
         for part in self.snake:
-            if part.isInitialized and any(piece != part and piece.x == part.x and piece.y == part.y for piece in self.snake):
+            if part.isInitialized and any(piece != part and piece.isInitialized and piece.x == part.x and piece.y == part.y for piece in self.snake):
                 return False
             if part.x < 0 or part.x >= self.width or part.y < 0 or part.y >= self.height:
                 return False
             if part.x == self.appleX and part.y == self.appleY:
                 self.snake.append(SnakeBlock(self.snake[-1].x, self.snake[-1].y))
                 self.generateApple()
-        self.score += len(self.snake)
+        self.score += len(part for part in self.snake if part.isInitialized)
         return True
