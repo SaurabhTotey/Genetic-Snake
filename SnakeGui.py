@@ -1,3 +1,4 @@
+import math
 import tkinter
 
 class SnakeWindow(tkinter.Frame):
@@ -23,6 +24,7 @@ class SnakeWindow(tkinter.Frame):
         self.drawBlock(game.appleX, game.appleY, "#f00", "#fff")
         for block in game.snake:
             self.drawBlock(block.x, block.y, "#000", "#fff")
+        self.canvas.create_text(game.width * self.cellSize - 30, 30, anchor=tkinter.NE, text=("Score: " + str(game.score)), font=("Times", 20))
         root.after(17, lambda: self.draw(game, root, counter + 1))
 
     def drawBlock(self, row, col, fill, stroke):
