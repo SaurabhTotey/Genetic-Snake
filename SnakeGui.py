@@ -13,8 +13,20 @@ class SnakeWindow(tkinter.Frame):
         self.master.title("Snake!")
         self.canvas = tkinter.Canvas(self)
         self.canvas.pack(fill=tkinter.BOTH, expand=1)
+        self.focus_set()
+        self.bind("<KeyPress>", lambda event: self.onKeyPress(game, event))
         self.master.after(17, lambda: self.draw(game, self.master, 1))
         self.master.mainloop()
+
+    def onKeyPress(self, game, event):
+        if event.char == "w":
+            game.queueDirection = [0, -1]
+        elif event.char == "a":
+            game.queueDirection = [-1, 0]
+        elif event.char == "s":
+            game.queueDirection = [0, 1]
+        elif event.char == "d":
+            game.queueDirection = [1, 0]
 
     def draw(self, game, root, counter):
         if counter % 15 == 0:
