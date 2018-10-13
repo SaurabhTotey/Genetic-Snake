@@ -27,6 +27,8 @@ class SnakeWindow(tkinter.Frame):
             game.queueDirection = [0, 1]
         elif event.char == "d":
             game.queueDirection = [1, 0]
+        if game.queueDirection[0] == -game.snakeDirection[0] or game.queueDirection[1] == -game.snakeDirection[1]:
+            game.queueDirection = None
 
     def draw(self, game, root, counter):
         if counter % 15 == 0:
