@@ -34,10 +34,8 @@ class SnakeGame:
     def generateApple(self):
         self.appleX = random.randint(0, self.width - 1)
         self.appleY = random.randint(0, self.height - 1)
-        for part in self.snake:
-            if part.x == self.appleX and part.y == self.appleY:
-                self.generateApple()
-                break
+        if any(part.x == self.appleX and part.y == self.appleY for part in self.snake):
+            self.generateApple()
 
     def step(self):
         if self.queueDirection != None:
