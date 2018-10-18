@@ -64,3 +64,15 @@ class SnakeGame:
                 self.generateApple()
         self.score += len([part for part in self.snake if part.isInitialized])
         return True
+
+    def getState(self):
+        state = []
+        state.append(self.snake[0].x)
+        state.append(self.snake[0].y)
+        state.append(self.snakeDirection[0])
+        state.append(self.snakeDirection[1])
+        state.append(self.appleX)
+        state.append(self.appleY)
+        for i in range(0, self.width * self.height):
+            state.append(1 if any(part.x == math.floor(i / self.width) and part.y == (i % self.width) for part in self.snake) else 0)
+        return state
