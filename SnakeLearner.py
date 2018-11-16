@@ -1,6 +1,6 @@
 import tensorflow
 
-class DeepQNeuralNetworkAgent:
+class SnakeLearner:
 
     def __init__(self):
         self.future_uncertainty_discount_rate = 0.9
@@ -16,6 +16,10 @@ class DeepQNeuralNetworkAgent:
         self.model.add(tensorflow.keras.layers.Dropout(0.15))
         self.model.add(tensorflow.keras.layers.Dense(4, activation='softmax'))
         self.model.compile(loss='mse', optimizer=tensorflow.keras.optimizers.Adam(0.0005))
+
+    def make_move(self, state):
+        initial_score = state.score
+        pass
 
     def train(self, initial_state, taken_action, output_reward, is_done):
         self.model.fit([initial_state, taken_action], output_reward, verbose=0)

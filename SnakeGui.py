@@ -5,8 +5,9 @@ class SnakeWindow(tkinter.Frame):
 
     cellSize = 50
 
-    def __init__(self, game):
+    def __init__(self, game, learner):
         super().__init__(width=game.width * self.cellSize, height=game.height * self.cellSize)
+        self.learner = learner
         self.pack()
         self.pack_propagate(0)
         self.master.resizable(0, 0)
@@ -19,23 +20,26 @@ class SnakeWindow(tkinter.Frame):
         self.master.mainloop()
 
     def onKeyPress(self, game, event):
+        if self.learner != None:
+            return
         if event.char == "w":
-            game.queueDirection = [0, -1]
+            game.queue_direction = [0, -1]
         elif event.char == "a":
-            game.queueDirection = [-1, 0]
+            game.queue_direction = [-1, 0]
         elif event.char == "s":
-            game.queueDirection = [0, 1]
+            game.queue_direction = [0, 1]
         elif event.char == "d":
-            game.queueDirection = [1, 0]
-        if game.queueDirection[0] == -game.snakeDirection[0] or game.queueDirection[1] == -game.snakeDirection[1]:
-            game.queueDirection = None
+            game.queue_direction = [1, 0]
+        if game.queue_direction[0] == -game.snake_direction[0] or game.queue_direction[1] == -game.snake_direction[1]:
+            game.queue_direction = None
 
     def draw(self, game, root, counter):
         if counter % 15 == 0:
+            #TODO predictions and stuff
             if not game.step():
                 return
         self.canvas.delete("all")
-        self.drawBlock(game.appleX, game.appleY, "#f00", "#fff")
+        self.drawBlock(game.apple_X, game.apple_Y, "#f00", "#fff")
         for block in game.snake:
             self.drawBlock(block.x, block.y, "#000", "#fff")
         self.canvas.create_text(game.width * self.cellSize - 30, 30, anchor=tkinter.NE, text=("Score: " + str(game.score)), font=("Times", 20))
