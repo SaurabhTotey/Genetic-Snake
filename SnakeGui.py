@@ -35,9 +35,13 @@ class SnakeWindow(tkinter.Frame):
 
     def draw(self, game, root, counter):
         if counter % 15 == 0:
-            #TODO predictions and stuff
-            if not game.step():
-                return
+            if self.learner != None:
+                is_alive = False #TODO get learner prediction
+                if not is_alive:
+                    return
+            else:
+                if not game.step():
+                    return
         self.canvas.delete("all")
         self.drawBlock(game.apple_X, game.apple_Y, "#f00", "#fff")
         for block in game.snake:
