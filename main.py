@@ -1,4 +1,3 @@
-import tensorflow
 import SnakeGame
 import SnakeGui
 

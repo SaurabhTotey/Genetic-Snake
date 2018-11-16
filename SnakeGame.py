@@ -69,8 +69,6 @@ class SnakeGame:
         state = []
         state.append(self.snake[0].x)
         state.append(self.snake[0].y)
-        state.append(self.snakeDirection[0])
-        state.append(self.snakeDirection[1])
         state.append(self.appleX)
         state.append(self.appleY)
         for i in range(0, self.width * self.height):
