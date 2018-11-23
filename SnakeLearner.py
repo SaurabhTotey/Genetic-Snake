@@ -1,3 +1,4 @@
+import numpy as np
 import random
 import SnakeGame
 import tensorflow as tf
@@ -21,7 +22,7 @@ class SnakeLearner:
     network_parameter_choices = {
         "number_neurons": [64, 128, 256],
         "number_layers": [1, 2, 3, 4],
-        "activation": ['relu', 'elu'],
+        "activation": ['relu', 'elu', 'linear'],
         "optimizer": ['rmsprop', 'adam'],
         "number_episodes": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     }
@@ -40,10 +41,10 @@ class SnakeLearner:
 
         for i in range(self.network_parameters["number_layers"]):
             if i == 0:
-                self.model.add(keras.layers.Dense(self.network_parameters["number_neurons"], activation=self.network_parameters["activation"], input_shape=(1,)))
+                self.model.add(keras.layers.Dense(self.network_parameters["number_neurons"], activation=self.network_parameters["activation"], input_shape=(705,)))
             else:
                 self.model.add(keras.layers.Dense(self.network_parameters["number_neurons"], activation=self.network_parameters["activation"]))
-        self.model.add(keras.layers.Dense(4, activation="softmax"))
+        self.model.add(keras.layers.Dense(1, activation="linear"))
 
         self.model.compile(loss="mse", optimizer=self.network_parameters["optimizer"])
 
@@ -54,15 +55,21 @@ class SnakeLearner:
         '''
         for _ in range(self.network_parameters["number_episodes"]):
             game = SnakeGame.SnakeGame()
+            move = -1
             while True:
-                break # TODO: train
+                move = np.argmax(self.model.predict(np.array([i] + game.get_state()).reshape(-1, 705), verbose=0) for i in range(4))
+                game.queue_direction = [[0, -1], [0, 1], [-1, 0], [1, 0]][move]
+                previous_score = game.score
+                is_alive = game.step()
+                self.model.fit(np.array([move] + game.get_state()).reshape(-1, 705), np.array([game.score - previous_score if is_alive else -100]), verbose=0)
+                if not is_alive:
+                    break
 
         test_scores = []
         for _ in range(5):
             game = SnakeGame.SnakeGame()
             while True:
-                predictions = self.model.predict(game.get_state())[0].tolist()
-                move = predictions.index(max(predictions))
+                move = np.argmax(self.model.predict(np.array([i] + game.get_state()).reshape(-1, 705), verbose=0) for i in range(4))
                 game.queue_direction = [[0, -1], [0, 1], [-1, 0], [1, 0]][move]
                 if not game.step():
                     test_scores.append(game.score)
