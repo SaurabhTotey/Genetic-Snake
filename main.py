@@ -4,4 +4,4 @@ import SnakeLearner
 
 if __name__ == '__main__':
     learner = SnakeLearner.SnakeLearner()
-    print(learner.train())
+    print(str(learner.network_parameters) + ": " + str(learner.train()))
