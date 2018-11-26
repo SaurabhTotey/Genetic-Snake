@@ -4,7 +4,7 @@ import SnakeGame
 import tensorflow as tf
 from tensorflow import keras
 
-max_turns_allowed = 10000
+max_turns_allowed = 5000
 
 class LearnerPopulationManager:
     '''
@@ -55,21 +55,27 @@ class SnakeLearner:
         Trains the neural network based on the network parameters and then runs the test runs where a fitness score is returned
         Fitness score is the average score of all the test runs (not training runs)
         '''
-        exploration_rate = 0.3
+        exploration_rate = 1
         for _ in range(self.network_parameters["number_episodes"]):
             game = SnakeGame.SnakeGame()
             move = -1
             for _ in range(max_turns_allowed):
                 if random.random() < exploration_rate:
                     move = random.choice(range(4))
-                    exploration_rate /= 2
+                    exploration_rate *= 0.9
                 else:
                     predictions = [self.model.predict(np.array([i] + game.get_state()).reshape(-1, 705), verbose=0).tolist()[0][0] for i in range(4)]
                     move = predictions.index(max(predictions))
                 game.queue_direction = [[0, -1], [0, 1], [-1, 0], [1, 0]][move]
                 previous_score = game.score
+                previous_apple_location = [game.apple_X, game.apple_Y]
                 is_alive = game.step()
-                self.model.fit(np.array([move] + game.get_state()).reshape(-1, 705), np.array([game.score - previous_score if is_alive else -100]), verbose=0)
+                reward = game.score - previous_score
+                if not is_alive:
+                    reward = -100
+                elif [game.apple_X, game.apple_Y] != previous_apple_location:
+                    reward = 100
+                self.model.fit(np.array([move] + game.get_state()).reshape(-1, 705), np.array([reward]), verbose=0)
                 if not is_alive:
                     break
 

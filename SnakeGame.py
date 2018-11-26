@@ -39,6 +39,8 @@ class SnakeGame:
 
     def step(self):
         if self.queue_direction != None:
+            if self.queue_direction[0] == -self.snake_direction[0] or self.queue_direction[1] == -self.snake_direction[1]:
+                return False
             self.snake_direction = self.queue_direction
         self.queue_direction = None
         old_X = self.snake[0].x
