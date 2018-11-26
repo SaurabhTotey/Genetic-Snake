@@ -56,8 +56,12 @@ class SnakeLearner:
         for _ in range(self.network_parameters["number_episodes"]):
             game = SnakeGame.SnakeGame()
             move = -1
-            while True:
-                move = np.argmax(self.model.predict(np.array([i] + game.get_state()).reshape(-1, 705), verbose=0) for i in range(4))
+            for _ in range(100000):
+                if random.random() < 0.1:
+                    move = random.choice(range(4))
+                else:
+                    predictions = [self.model.predict(np.array([i] + game.get_state()).reshape(-1, 705), verbose=0).tolist()[0][0] for i in range(4)]
+                    move = predictions.index(max(predictions))
                 game.queue_direction = [[0, -1], [0, 1], [-1, 0], [1, 0]][move]
                 previous_score = game.score
                 is_alive = game.step()
@@ -68,8 +72,9 @@ class SnakeLearner:
         test_scores = []
         for _ in range(5):
             game = SnakeGame.SnakeGame()
-            while True:
-                move = np.argmax(self.model.predict(np.array([i] + game.get_state()).reshape(-1, 705), verbose=0) for i in range(4))
+            for _ in range(100000):
+                predictions = [self.model.predict(np.array([i] + game.get_state()).reshape(-1, 705), verbose=0).tolist()[0][0] for i in range(4)]
+                move = predictions.index(max(predictions))
                 game.queue_direction = [[0, -1], [0, 1], [-1, 0], [1, 0]][move]
                 if not game.step():
                     test_scores.append(game.score)
