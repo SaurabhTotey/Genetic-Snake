@@ -4,6 +4,8 @@ import SnakeGame
 import tensorflow as tf
 from tensorflow import keras
 
+max_turns_allowed = 10000
+
 class LearnerPopulationManager:
     '''
     An object that manages SnakeLearners using genetic and evolutionary algorithms
@@ -24,7 +26,7 @@ class SnakeLearner:
         "number_layers": [1, 2, 3, 4],
         "activation": ['relu', 'elu', 'linear'],
         "optimizer": ['rmsprop', 'adam'],
-        "number_episodes": [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+        "number_episodes": [5 * (i + 1) for i in range(200)]
     }
 
     def __init__(self, network_parameters = None):
@@ -53,12 +55,14 @@ class SnakeLearner:
         Trains the neural network based on the network parameters and then runs the test runs where a fitness score is returned
         Fitness score is the average score of all the test runs (not training runs)
         '''
+        exploration_rate = 0.3
         for _ in range(self.network_parameters["number_episodes"]):
             game = SnakeGame.SnakeGame()
             move = -1
-            for _ in range(100000):
-                if random.random() < 0.1:
+            for _ in range(max_turns_allowed):
+                if random.random() < exploration_rate:
                     move = random.choice(range(4))
+                    exploration_rate /= 2
                 else:
                     predictions = [self.model.predict(np.array([i] + game.get_state()).reshape(-1, 705), verbose=0).tolist()[0][0] for i in range(4)]
                     move = predictions.index(max(predictions))
@@ -72,9 +76,10 @@ class SnakeLearner:
         test_scores = []
         for _ in range(5):
             game = SnakeGame.SnakeGame()
-            for _ in range(100000):
+            for _ in range(max_turns_allowed):
                 predictions = [self.model.predict(np.array([i] + game.get_state()).reshape(-1, 705), verbose=0).tolist()[0][0] for i in range(4)]
                 move = predictions.index(max(predictions))
+                print(str(predictions) + ": " + str(move))
                 game.queue_direction = [[0, -1], [0, 1], [-1, 0], [1, 0]][move]
                 if not game.step():
                     test_scores.append(game.score)
