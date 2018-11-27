@@ -19,7 +19,7 @@ class GeneticLearner:
     def fitness_of(self, moveset):
         game = SnakeGame.SnakeGame()
         for move in moveset:
-            game.queue_direction([[0, -1], [0, 1], [-1, 0], [1, 0]][move])
+            game.queue_direction(direction_of_move(move))
             if game.step():
                 break
         return game.score
@@ -31,6 +31,8 @@ class GeneticLearner:
         for i in range(max_turns_allowed):
             if random.random() < self.mutation_rate:
                 new_moveset[i] = random.choice(range(4))
+        while len(new_moveset) < max_turns_allowed:
+            new_moveset.append(random.choice(range(4)))
         return new_moveset
 
     def best_of_generation(self):
@@ -53,8 +55,10 @@ class GeneticLearner:
                 low_scorers_added += 1
                 new_population.append(self.breed(best_scorer, self.population[index]))
             checking_index += 1
+            if checking_index == len(checking_order):
+                break
 
-        best_players = [i for i in range(self.population_size) if scores[i] > score_cutoff]
+        best_players = [i for i in range(self.population_size) if scores[i] >= score_cutoff]
         while len(new_population) < self.population_size:
             index_of_first = random.choice(best_players)
             index_of_second = index_of_first
@@ -64,3 +68,6 @@ class GeneticLearner:
 
         self.population = new_population
         return best_scorer
+
+def direction_of_move(move):
+    return [[0, -1], [0, 1], [-1, 0], [1, 0]][move]
