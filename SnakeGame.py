@@ -1,78 +1,91 @@
 import math
-import random
 
 class SnakeBlock:
 
     def __init__(self, x, y):
+        self.is_alive = False
+        self.next_block = None
         self.x = x
         self.y = y
-        self.is_initialized = False
 
-    def move(self, change_X, change_Y):
-        self.x += change_X
-        self.y += change_Y
-        self.is_initialized = True
+    def move_to(self, x, y):
+        if self.next_block != None:
+            if self.next_block.is_alive:
+                self.next_block.move_to(self.x, self.y)
+            else:
+                self.next_block.is_alive = True
+        self.x = x
+        self.y = y
+    
+    def grow(self):
+        if self.next_block == None:
+            self.next_block = SnakeBlock(self.x, self.y)
+        else:
+            self.next_block.grow()
 
-    def __repr__(self):
-        return "SnakeBlock(" + str(self.x) + ", " + str(self.y) + ", " + "is_initialized = " + str(self.is_initialized) + ")"
-
-
+    def get_size(self):
+        if self.next_block == None:
+            return 1
+        else:
+            return 1 + self.next_block.get_size()
 
 class SnakeGame:
 
     def __init__(self):
         self.width = 20
-        self.height = 35
-        snake_X = math.floor(self.width / 2)
-        snake_Y = math.floor(self.height / 2)
-        self.snake = [SnakeBlock(snake_X, snake_Y), SnakeBlock(snake_X, snake_Y)]
-        self.snake_direction = [0, -1]
-        self.queue_direction = None
-        self.score = 0
+        self.height = 20
+        self.queued_direction = [0, -1]
+        self.head = SnakeBlock(self.width / 2, int(math.floor(self.height / 2.0)))
+        self.head.next_block = SnakeBlock(self.width / 2, self.head.y + 1)
+        self.head.next_block.is_alive = True
+        self.apple_locations = []
         self.generate_apple()
+        self.score = 0
+
+    def queue_direction(self, direction):
+        if int(math.fabs(direction[0] + direction[1])) == 1:
+            self.queued_direction = direction
 
     def generate_apple(self):
-        self.apple_X = random.randint(0, self.width - 1)
-        self.apple_Y = random.randint(0, self.height - 1)
-        if any(part.x == self.apple_X and part.y == self.apple_Y for part in self.snake):
-            self.generate_apple()
+        corners = [[-1, -1], [-1, self.height], [self.width, -1], [self.width, self.height]]
+        furthest_corner_distance = -1
+        furthest_corner = None
+        for corner in corners:
+            distance = distance_between(self.head.x, self.head.y, corner[0], corner[1])
+            distance += sum(distance_between(apple_location[0], apple_location[1], corner[0], corner[1]) for apple_location in self.apple_locations)
+            if distance > furthest_corner_distance:
+                furthest_corner_distance = distance
+                furthest_corner = corner
+        tail = self.head
+        while tail.next_block != None:
+            tail = tail.next_block
+        self.apple_x = int((self.head.x + tail.x + furthest_corner[0]) / 3)
+        self.apple_y = int((self.head.y + tail.y + furthest_corner[1]) / 3)
+        self.apple_locations.append([self.apple_x, self.apple_y])
+        current_block = self.head
+        while current_block != None:
+            if current_block.x == self.apple_x and current_block.y == self.apple_y:
+                self.generate_apple()
+                break
+            current_block = current_block.next_block
 
     def step(self):
-        if self.queue_direction != None:
-            if self.queue_direction[0] == -self.snake_direction[0] or self.queue_direction[1] == -self.snake_direction[1]:
-                return False
-            self.snake_direction = self.queue_direction
-        self.queue_direction = None
-        old_X = self.snake[0].x
-        old_Y = self.snake[0].y
-        self.snake[0].move(self.snake_direction[0], self.snake_direction[1])
-        for i in range(1, len(self.snake)):
-            part = self.snake[i]
-            if not part.is_initialized:
-                part.is_initialized = True
-                break
-            new_old_X = part.x
-            new_old_Y = part.y
-            part.move(old_X - new_old_X, old_Y - new_old_Y)
-            old_X = new_old_X
-            old_Y = new_old_Y
-        for part in self.snake:
-            if part.is_initialized and any((piece != part and piece.is_initialized and piece.x == part.x and piece.y == part.y) for piece in self.snake):
-                return False
-            if part.x < 0 or part.x >= self.width or part.y < 0 or part.y >= self.height:
-                return False
-            if part.x == self.apple_X and part.y == self.apple_Y:
-                self.snake.append(SnakeBlock(self.snake[-1].x, self.snake[-1].y))
-                self.generate_apple()
-        self.score += len([part for part in self.snake if part.is_initialized])
-        return True
+        snake_direction = [self.head.x - self.head.next_block.x, self.head.y - self.head.next_block.y]
+        if (snake_direction[0] != 0 and snake_direction[0] == -self.queued_direction[0]) or (snake_direction[1] != 0 and snake_direction[1] == -self.queued_direction[1]):
+            return True
+        self.head.move_to(self.head.x + self.queued_direction[0], self.head.y + self.queued_direction[1])
+        current_block = self.head.next_block
+        while current_block != None:
+            if current_block.x == self.head.x and current_block.y == self.head.y:
+                return True
+            current_block = current_block.next_block
+        if self.head.x < 0 or self.head.x >= self.width or self.head.y < 0 or self.head.y >= self.height:
+            return True
+        if self.head.x == self.apple_x and self.head.y == self.apple_y:
+            self.head.grow()
+            self.generate_apple()
+        self.score += self.head.get_size()
+        return False
 
-    def get_state(self):
-        state = []
-        state.append(self.snake[0].x)
-        state.append(self.snake[0].y)
-        state.append(self.apple_X)
-        state.append(self.apple_Y)
-        for i in range(0, self.width * self.height):
-            state.append(1 if any(part.x == math.floor(i / self.width) and part.y == (i % self.width) for part in self.snake) else 0)
-        return state
+def distance_between(x1, y1, x2, y2):
+    return int(math.fabs(x2 - x1) + math.fabs(y2 - y1))

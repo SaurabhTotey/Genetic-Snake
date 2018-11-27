@@ -23,27 +23,29 @@ class SnakeWindow(tkinter.Frame):
         if self.learner != None:
             return
         if event.char == "w":
-            game.queue_direction = [0, -1]
+            game.queue_direction([0, -1])
         elif event.char == "a":
-            game.queue_direction = [-1, 0]
+            game.queue_direction([-1, 0])
         elif event.char == "s":
-            game.queue_direction = [0, 1]
+            game.queue_direction([0, 1])
         elif event.char == "d":
-            game.queue_direction = [1, 0]
+            game.queue_direction([1, 0])
 
     def draw(self, game, root, counter):
         if counter % 15 == 0:
             if self.learner != None:
-                is_alive = False #TODO get learner prediction
-                if not is_alive:
+                is_done = False #TODO get learner prediction
+                if is_done:
                     return
             else:
-                if not game.step():
+                if game.step():
                     return
         self.canvas.delete("all")
-        self.drawBlock(game.apple_X, game.apple_Y, "#f00", "#fff")
-        for block in game.snake:
+        self.drawBlock(game.apple_x, game.apple_y, "#f00", "#fff")
+        block = game.head
+        while block != None:
             self.drawBlock(block.x, block.y, "#000", "#fff")
+            block = block.next_block
         self.canvas.create_text(game.width * self.cellSize - 30, 30, anchor=tkinter.NE, text=("Score: " + str(game.score)), font=("Times", 20))
         root.after(17, lambda: self.draw(game, root, counter + 1))
 
