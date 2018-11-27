@@ -10,11 +10,13 @@ class GeneticLearner:
     mutation_rate = 0.001
 
     def __init__(self):
-        self.population = []
-        for i in range(self.population_size):
-            self.population.append([])
-            for _ in range(max_turns_allowed):
-                self.population[i].append(random.choice(range(4)))
+        self.population = [self.get_random_moveset() for _ in range(self.population_size)]
+
+    def get_random_moveset(self):
+        moveset = []
+        for _ in range(max_turns_allowed):
+            moveset.append(random.choice(range(4)))
+        return moveset
 
     def fitness_of(self, moveset):
         game = SnakeGame.SnakeGame()
@@ -44,6 +46,8 @@ class GeneticLearner:
 
         new_population = []
         new_population.append(best_scorer)
+        for _ in range(3):
+            new_population.append(self.get_random_moveset())
 
         low_scorers_added = 0
         checking_index = 0

@@ -40,7 +40,7 @@ class SnakeWindow(tkinter.Frame):
         if counter % (15 if self.learner == None else 1) == 0:
             if self.learner != None:
                 game.queue_direction(SnakeLearner.direction_of_move(self.best_moveset.pop(0)))
-                if game.step():
+                if game.step() or len(self.best_moveset) == 0:
                     game = SnakeGame.SnakeGame()
                     self.best_moveset = self.learner.best_of_generation()
                     self.generation += 1
