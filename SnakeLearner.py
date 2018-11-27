@@ -7,7 +7,7 @@ max_turns_allowed = 5000
 class GeneticLearner:
 
     population_size = 1000
-    mutation_rate = 0.0001
+    mutation_rate = 0.001
 
     def __init__(self):
         self.population = []
@@ -28,11 +28,11 @@ class GeneticLearner:
         new_moveset = []
         for i in range(0, max_turns_allowed, 10):
             new_moveset += random.choice([m1[i:i+10], m2[i:i+10]])
+        while len(new_moveset) < max_turns_allowed:
+            new_moveset.append(random.choice(range(4)))
         for i in range(max_turns_allowed):
             if random.random() < self.mutation_rate:
                 new_moveset[i] = random.choice(range(4))
-        while len(new_moveset) < max_turns_allowed:
-            new_moveset.append(random.choice(range(4)))
         return new_moveset
 
     def best_of_generation(self):
